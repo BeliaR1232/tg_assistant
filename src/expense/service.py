@@ -1,0 +1,123 @@
+from sqlalchemy import func, insert, select, text
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+from telegram import Update
+
+from src.database import Category, Expense, User
+from src.expense.schemes import (
+    CategoryScheme,
+    ExpenseCreateScheme,
+    ExpenseScheme,
+    UserScheme,
+)
+
+
+async def add_expense(session: AsyncSession, new_expense: ExpenseCreateScheme, update_tg: Update) -> ExpenseScheme:
+    category = await get_category_by_alias(session, new_expense.category_name)
+    user = await get_or_create_user_by_tg_id(session, update_tg)
+    expense = await add_expense_in_db(session, new_expense, category, user)
+    return expense
+
+
+async def get_or_create_user_by_tg_id(session: AsyncSession, update_tg: Update) -> UserScheme:
+    json_build = func.json_build_object(
+        text("'id', id"),
+        text("'telegram_id', telegram_id"),
+        text("'chat_id', chat_id"),
+        text("'name', name"),
+        text("'lastname', lastname"),
+        text("'is_active', is_active"),
+    )
+    stmt = select(json_build).where(User.telegram_id == update_tg.effective_user.id)
+    result = await session.execute(stmt)
+    try:
+        user = result.scalar_one()
+    except NoResultFound:
+        stmt = (
+            insert(User)
+            .values(
+                {
+                    "telegram_id": update_tg.effective_user.id,
+                    "chat_id": update_tg.effective_chat.id,
+                    "name": update_tg.effective_user.first_name,
+                    "lastname": update_tg.effective_user.last_name,
+                }
+            )
+            .returning(json_build)
+        )
+        result = await session.execute(stmt)
+        await session.commit()
+        user = result.scalar_one()
+    return UserScheme.model_validate(user)
+
+
+async def get_category_by_alias(session: AsyncSession, category_alias: str) -> CategoryScheme:
+    stmt = select(
+        func.json_build_object(
+            text("'id', id"),
+            text("'name', name"),
+            text("'is_base_expense', is_base_expense"),
+            text("'codename', codename"),
+        ),
+    ).where(Category.aliases.has_key(category_alias))
+    result = await session.execute(stmt)
+    try:
+        category = result.scalar_one()
+    except NoResultFound:
+        stmt = select(
+            func.json_build_object(
+                text("'id', id"),
+                text("'name', name"),
+                text("'is_base_expense', is_base_expense"),
+                text("'codename', codename"),
+            ),
+        ).where(Category.aliases.has_key("прочее"))
+        result = await session.execute(stmt)
+        category = result.scalar_one()
+    return CategoryScheme.model_validate(category)
+
+
+async def add_expense_in_db(
+    session: AsyncSession,
+    new_expense: ExpenseCreateScheme,
+    category: CategoryScheme,
+    user: UserScheme,
+) -> ExpenseScheme:
+    stmt = (
+        insert(Expense)
+        .values(
+            {
+                "amount": new_expense.amount,
+                "description": new_expense.description,
+                "category_id": category.id,
+                "user_id": user.id,
+            }
+        )
+        .returning(
+            func.json_build_object(
+                text("'id', id"),
+                text("'amount', amount"),
+                text("'user_id', user_id"),
+                text("'category_id', category_id"),
+            )
+        )
+    )
+    result = await session.execute(stmt)
+    await session.commit()
+    expense = result.scalar_one()
+    expense["category_name"] = category.name
+    return ExpenseScheme.model_validate(expense)
+
+
+async def get_all_category(session: AsyncSession) -> list[CategoryScheme]:
+    stmt = select(
+        func.json_build_object(
+            text("'id', id"),
+            text("'name', name"),
+            text("'is_base_expense', is_base_expense"),
+            text("'codename', codename"),
+        ),
+    ).select_from(Category)
+    result = await session.execute(stmt)
+    categories = result.scalars().all()
+    return [CategoryScheme.model_validate(category) for category in categories]

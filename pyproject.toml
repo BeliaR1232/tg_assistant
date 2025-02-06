@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "tg-finance"
+version = "0.1.0"
+description = "Telegram bot for financial accounting."
+authors = ["Dmitry Pushkin"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+python-telegram-bot = "^21.10"
+pydantic = "^2.10.6"
+pydantic-settings = "^2.7.1"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.37"}
+asyncpg = "^0.30.0"
+alembic = "^1.14.1"
+orjson = "^3.10.15"
+alembic-postgresql-enum = "^1.6.0"

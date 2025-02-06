@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16-alpine3.20
+    environment:
+      POSTGRES_DB: ${DATABASE__POSTGRES_DB}
+      POSTGRES_USER: ${DATABASE__POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DATABASE__POSTGRES_PASSWORD}
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    env_file: .env
+    volumes:
+      - tg-assistan-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+
+  tg_assisnant:
+    build: .
+    command: sh ./entrypoint.sh
+    env_file: .env
+    depends_on:
+      - postgres
+
+volumes:
+  tg-assistan-data:
