@@ -5,7 +5,7 @@ from src.database import db_helper
 from src.expense.exceptions import BadExpense
 from src.expense.schemes import ExpenseCreateScheme
 from src.expense.service import add_expense, get_all_category
-from src.handlers import main_keybord
+from src.handlers import main_keyboard
 
 AMOUNT, CATEGORY, DESCRIPTION = range(3)
 
@@ -61,7 +61,7 @@ async def process_description(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     expense = await add_expense(session, expense, update)
     answer = f"Добавленны траты 🛒:\nСумма: {expense.amount}\nКатегория: {expense.category_name}"
-    await update.message.reply_text(answer, reply_markup=main_keybord)
+    await update.message.reply_text(answer, reply_markup=main_keyboard)
     return ConversationHandler.END
 
 

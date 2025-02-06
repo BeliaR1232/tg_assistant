@@ -1,3 +1,6 @@
+from datetime import date
+
+from dateutil.relativedelta import relativedelta
 from sqlalchemy import func, insert, select, text
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +11,7 @@ from src.expense.schemes import (
     CategoryScheme,
     ExpenseCreateScheme,
     ExpenseScheme,
+    ExpenseStatisticScheme,
     UserScheme,
 )
 
@@ -121,3 +125,28 @@ async def get_all_category(session: AsyncSession) -> list[CategoryScheme]:
     result = await session.execute(stmt)
     categories = result.scalars().all()
     return [CategoryScheme.model_validate(category) for category in categories]
+
+
+async def get_statistics_by_months_count(
+    session: AsyncSession,
+    user_telegram_id: int,
+    months_count: int = 0,
+) -> list[ExpenseStatisticScheme]:
+    date_range = (date.today() + relativedelta(months=-months_count, day=1), date.today() + relativedelta(day=31))
+    stmt = (
+        select(
+            func.json_build_object(
+                text("'amount', sum(expense.amount)"),
+                text("'category_name', category.name"),
+            )
+        )
+        .select_from(Expense)
+        .join(User, Expense.user_id == User.id)
+        .join(Category, Expense.category_id == Category.id)
+        .where(User.telegram_id == user_telegram_id)
+        .where(Expense.created_at.between(date_range[0], date_range[1]))
+        .group_by(Category.name)
+    )
+    result = await session.execute(stmt)
+    expenses = result.scalars().all()
+    return [ExpenseStatisticScheme.model_validate(stat) for stat in expenses]

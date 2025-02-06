@@ -39,3 +39,8 @@ class UserScheme(BaseModel):
     is_active: bool
     expenses: list["ExpenseScheme"] = Field(default_factory=list)
     assets: list["AssetsScheme"] = Field(default_factory=list)
+
+
+class ExpenseStatisticScheme(BaseModel):
+    amount: float
+    category_name: str
