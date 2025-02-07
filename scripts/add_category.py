@@ -134,6 +134,12 @@ categoryes = [
         "aliases": ["айкидо", "спортзал", "зал"],
         "is_base_expense": False,
     },
+    {
+        "codename": "home",
+        "name": "дом",
+        "aliases": ["леруа", "ремонт"],
+        "is_base_expense": False,
+    },
 ]
 
 
