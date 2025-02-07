@@ -35,7 +35,6 @@ if __name__ == "__main__":
 
     start_handler = CommandHandler("start", start)
     stat_handler = MessageHandler(filters.Regex("^Статистика$"), get_statistic_start)
-    exit_handler = CommandHandler("cancel", cancel)
     expense_handler = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^Добавить расход$"), add_expense_start)],
         states={
@@ -51,7 +50,6 @@ if __name__ == "__main__":
     application.add_handler(stat_handler)
     application.add_handler(three_month_stat)
     application.add_handler(month_stat)
-    application.add_handler(exit_handler)
     application.add_handler(expense_handler)
 
     application.run_polling()

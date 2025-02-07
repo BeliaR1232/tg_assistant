@@ -20,7 +20,7 @@ async def add_expense_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def process_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         amount = update.message.text.replace(",", ".")
-        amount = float(amount)
+        amount = abs(float(amount))
         context.user_data["amount"] = amount
         categories = await get_all_category(session)
 
