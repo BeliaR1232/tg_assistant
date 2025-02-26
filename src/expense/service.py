@@ -149,4 +149,29 @@ async def get_statistics_by_months_count(
     )
     result = await session.execute(stmt)
     expenses = result.scalars().all()
+    expense = [ExpenseStatisticScheme.model_validate(stat) for stat in expenses]
+    return list(sorted(expense, key=lambda x: x.amount, reverse=True))
+
+
+async def get_top_expense(
+    session: AsyncSession,
+    user_telegram_id: int,
+    count: int = 10,
+) -> list[ExpenseStatisticScheme]:
+    stmt = (
+        select(
+            func.json_build_object(
+                text("'amount', expense.amount"),
+                text("'category_name', category.name"),
+            )
+        )
+        .select_from(Expense)
+        .join(User, Expense.user_id == User.id)
+        .join(Category, Expense.category_id == Category.id)
+        .where(User.telegram_id == user_telegram_id)
+        .order_by(Expense.id.desc())
+        .limit(count)
+    )
+    result = await session.execute(stmt)
+    expenses = result.scalars().all()
     return [ExpenseStatisticScheme.model_validate(stat) for stat in expenses]

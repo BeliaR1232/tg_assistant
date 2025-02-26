@@ -22,8 +22,10 @@ from src.expense.handlers.expense import (
 from src.expense.handlers.statistics import (
     MONTH_STAT,
     THREE_MONTHS_STAT,
+    TOP_EXPENSE,
     get_month_stat,
     get_statistic_start,
+    get_top_expense_stat,
 )
 from src.handlers import cancel, start
 
@@ -46,10 +48,12 @@ if __name__ == "__main__":
     )
     month_stat = CallbackQueryHandler(get_month_stat, pattern="^" + str(MONTH_STAT) + "$")
     three_month_stat = CallbackQueryHandler(get_month_stat, pattern="^" + str(THREE_MONTHS_STAT) + "$")
+    top_stat = CallbackQueryHandler(get_top_expense_stat, pattern="^" + str(TOP_EXPENSE) + "$")
     application.add_handler(start_handler)
     application.add_handler(stat_handler)
     application.add_handler(three_month_stat)
     application.add_handler(month_stat)
+    application.add_handler(top_stat)
     application.add_handler(expense_handler)
 
     application.run_polling()
