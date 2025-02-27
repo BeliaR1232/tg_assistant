@@ -5,7 +5,7 @@ from src.database import db_helper
 from src.expense.service import get_or_create_user_by_tg_id
 
 main_keyboard = ReplyKeyboardMarkup(
-    [["Добавить расход"], ["Статистика"]],
+    [["Добавить расход"], ["Удалить расход"], ["Статистика"]],
     resize_keyboard=True,
     input_field_placeholder="Выбери действие:",
 )

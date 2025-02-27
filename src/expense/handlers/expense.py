@@ -1,15 +1,49 @@
+import pytz
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 from src.database import db_helper
 from src.expense.exceptions import BadExpense
+from src.expense.handlers.statistics import expense_template
 from src.expense.schemes import ExpenseCreateScheme
-from src.expense.service import add_expense, get_all_category
+from src.expense.service import (
+    add_expense,
+    delete_expense,
+    get_all_category,
+    get_top_expense,
+)
 from src.handlers import main_keyboard
 
-AMOUNT, CATEGORY, DESCRIPTION = range(3)
+AMOUNT, CATEGORY, DESCRIPTION, DELETE = range(4)
 
 session = db_helper.session_factory()
+
+
+async def delete_expense_start(update: Update, contex: ContextTypes.DEFAULT_TYPE):
+    user_telegram_id = update.effective_user.id
+    expenses = await get_top_expense(session, user_telegram_id)
+    answer = "Последние 10 трат.:\n\n"
+    for expense in expenses:
+        answer += expense_template.format(
+            expense_id=expense.id,
+            expense_category=expense.category_name,
+            expense_desc=expense.description if expense.description else "",
+            expense_amount=expense.amount,
+            expense_dt=expense.created_at.astimezone(pytz.timezone("Europe/Moscow")).strftime("%Y-%m-%d %H:%M:%S"),
+        )
+    await update.message.reply_text(answer, reply_markup=ReplyKeyboardRemove())
+    await update.message.reply_text("Введите id траты, которую хотите удалить.")
+    return DELETE
+
+
+async def delete_expense_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    expense_id = update.message.text
+    if not expense_id.isdigit():
+        await update.message.reply_text("Пожалуйста, введите корректный id траты.")
+        return DELETE
+    await delete_expense(session, expense_id)
+    await update.message.reply_text(f"Расход {expense_id} успешно удалён.", reply_markup=main_keyboard)
+    return ConversationHandler.END
 
 
 async def add_expense_start(update: Update, context: ContextTypes.DEFAULT_TYPE):

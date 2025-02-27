@@ -43,9 +43,14 @@ class UserScheme(BaseModel):
     assets: list["AssetsScheme"] = Field(default_factory=list)
 
 
-class ExpenseStatisticScheme(BaseModel):
+class ExpenseTopScheme(BaseModel):
     id: int
     amount: float
     category_name: str
     created_at: datetime
     description: str | None
+
+
+class ExpenseStatisticScheme(BaseModel):
+    amount: float
+    category_name: str
