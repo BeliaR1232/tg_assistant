@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -42,5 +44,8 @@ class UserScheme(BaseModel):
 
 
 class ExpenseStatisticScheme(BaseModel):
+    id: int
     amount: float
     category_name: str
+    created_at: datetime
+    description: str | None

@@ -1,3 +1,4 @@
+import pytz
 from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -43,9 +44,16 @@ async def get_top_expense_stat(update: Update, context: ContextTypes.DEFAULT_TYP
     await query.answer()
     user_telegram_id = update.effective_user.id
     statistics = await get_top_expense(session, user_telegram_id)
-    answer = "Последние 10 трат\n\n"
+    answer = "Последние 10 трат:\n\n"
+    expense_template = "Трата {expense_id}:\n\tКатегория: {expense_category}\n\tОписание: {expense_desc}\n\tСумма: {expense_amount}\n\tДата и время: {expense_dt}\n\n"
     for stat in statistics:
-        answer += f"{stat.category_name.capitalize()}: {stat.amount}\n"
+        answer += expense_template.format(
+            expense_id=stat.id,
+            expense_category=stat.category_name,
+            expense_desc=stat.description if stat.description else "",
+            expense_amount=stat.amount,
+            expense_dt=stat.created_at.astimezone(pytz.timezone("Europe/Moscow")).strftime("%Y-%m-%d %H:%M:%S"),
+        )
     await context.bot.send_message(chat_id=update.effective_chat.id, text=answer, reply_markup=main_keyboard)
 
 

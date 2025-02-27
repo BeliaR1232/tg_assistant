@@ -161,8 +161,11 @@ async def get_top_expense(
     stmt = (
         select(
             func.json_build_object(
+                text("'id', expense.id"),
                 text("'amount', expense.amount"),
                 text("'category_name', category.name"),
+                text("'created_at', expense.created_at"),
+                text("'description', expense.description"),
             )
         )
         .select_from(Expense)
