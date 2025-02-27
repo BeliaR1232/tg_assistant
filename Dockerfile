@@ -1,7 +1,6 @@
 FROM python:3.12-slim-bullseye
 
-ENV POETRY_VERSION=1.8.5 \
-    UID=1001 \
+ENV UID=1001 \
     GID=1001 \
     PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
@@ -10,10 +9,6 @@ ENV POETRY_VERSION=1.8.5 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
     DOCKERIZE_VERSION=v0.9.2 \
-    POETRY_VERSION=1.8.5 \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_CACHE_DIR='/var/cache/pypoetry' \
     PATH="$PATH:/root/.local/bin"
 
 RUN apt-get update \
@@ -31,14 +26,22 @@ RUN apt-get update \
   && tar -C /usr/local/bin -xzvf "dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz" \
   && rm "dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz" && dockerize --version \
   && pip install -U pip \
-  && curl -sSL 'https://install.python-poetry.org' | python \
-  && poetry --version
+  && curl -LsSf https://astral.sh/uv/install.sh | sh \
+  && uv --version
 
 WORKDIR /code
 
-COPY ./poetry.lock ./pyproject.toml /code/
+COPY ./uv.lock ./pyproject.toml /code/
 
-RUN poetry install
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
+
+ENV PATH="/code/.venv/bin:$PATH"
 
 RUN groupadd -r tg_bot && useradd -d /code -r -g tg_bot tg_bot && chown tg_bot:tg_bot -R /code
 
