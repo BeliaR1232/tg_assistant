@@ -15,6 +15,9 @@ MONTH_STAT, THREE_MONTHS_STAT, TOP_EXPENSE = range(3)
 session = db_helper.session_factory()
 
 
+expense_template = "Трата {expense_id}:\n\tКатегория: {expense_category}\n\tОписание: {expense_desc}\n\tСумма: {expense_amount}\n\tДата и время: {expense_dt}\n\n"
+
+
 async def get_statistic_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     buttons = [
         [InlineKeyboardButton(text="Последние 10 трат", callback_data=str(TOP_EXPENSE))],
@@ -45,7 +48,6 @@ async def get_top_expense_stat(update: Update, context: ContextTypes.DEFAULT_TYP
     user_telegram_id = update.effective_user.id
     statistics = await get_top_expense(session, user_telegram_id)
     answer = "Последние 10 трат:\n\n"
-    expense_template = "Трата {expense_id}:\n\tКатегория: {expense_category}\n\tОписание: {expense_desc}\n\tСумма: {expense_amount}\n\tДата и время: {expense_dt}\n\n"
     for stat in statistics:
         answer += expense_template.format(
             expense_id=stat.id,

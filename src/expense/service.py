@@ -1,7 +1,7 @@
 from datetime import date
 
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import func, insert, select, text
+from sqlalchemy import delete, func, insert, select, text
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from telegram import Update
@@ -12,6 +12,7 @@ from src.expense.schemes import (
     ExpenseCreateScheme,
     ExpenseScheme,
     ExpenseStatisticScheme,
+    ExpenseTopScheme,
     UserScheme,
 )
 
@@ -157,7 +158,7 @@ async def get_top_expense(
     session: AsyncSession,
     user_telegram_id: int,
     count: int = 10,
-) -> list[ExpenseStatisticScheme]:
+) -> list[ExpenseTopScheme]:
     stmt = (
         select(
             func.json_build_object(
@@ -177,4 +178,10 @@ async def get_top_expense(
     )
     result = await session.execute(stmt)
     expenses = result.scalars().all()
-    return [ExpenseStatisticScheme.model_validate(stat) for stat in expenses]
+    return [ExpenseTopScheme.model_validate(stat) for stat in expenses]
+
+
+async def delete_expense(session: AsyncSession, expense_id: str):
+    stmt = delete(Expense).where(Expense.id == int(expense_id))
+    await session.execute(stmt)
+    await session.commit()
