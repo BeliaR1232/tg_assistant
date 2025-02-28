@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import delete, func, insert, select, text
@@ -133,7 +133,10 @@ async def get_statistics_by_months_count(
     user_telegram_id: int,
     months_count: int = 0,
 ) -> list[ExpenseStatisticScheme]:
-    date_range = (date.today() + relativedelta(months=-months_count, day=1), date.today() + relativedelta(day=31))
+    date_range = (
+        datetime.now() + relativedelta(hour=0, minute=0, second=1, months=-months_count, day=1),
+        datetime.now() + relativedelta(hour=23, minute=59, second=59, day=31),
+    )
     stmt = (
         select(
             func.json_build_object(
