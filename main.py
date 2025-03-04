@@ -28,6 +28,7 @@ from src.expense.handlers.statistics import (
     TOP_EXPENSE,
     get_month_stat,
     get_statistic_start,
+    get_three_months_stat,
     get_top_expense_stat,
 )
 from src.handlers import cancel, start
@@ -57,7 +58,7 @@ if __name__ == "__main__":
         fallbacks=[CommandHandler("cancel", cancel)],
     )
     month_stat = CallbackQueryHandler(get_month_stat, pattern="^" + str(MONTH_STAT) + "$")
-    three_month_stat = CallbackQueryHandler(get_month_stat, pattern="^" + str(THREE_MONTHS_STAT) + "$")
+    three_month_stat = CallbackQueryHandler(get_three_months_stat, pattern="^" + str(THREE_MONTHS_STAT) + "$")
     top_stat = CallbackQueryHandler(get_top_expense_stat, pattern="^" + str(TOP_EXPENSE) + "$")
     application.add_handler(start_handler)
     application.add_handler(stat_handler)
