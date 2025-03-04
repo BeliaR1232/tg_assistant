@@ -7,6 +7,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE__POSTGRES_PASSWORD}
       PGDATA: "/var/lib/postgresql/data/pgdata"
     env_file: .env
+    restart: "unless-stopped"
     volumes:
       - tg-assistan-data:/var/lib/postgresql/data
     deploy:
@@ -21,6 +22,7 @@ services:
     env_file: .env
     depends_on:
       - postgres
+    restart: "unless-stopped"
 
 volumes:
   tg-assistan-data:
