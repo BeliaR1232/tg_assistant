@@ -16,7 +16,7 @@ from src.configs import settings
 from src.utils import camel_case_to_snake_case, datetime_utc_now
 
 
-class BaseModel(DeclarativeBase):
+class BaseDbModel(DeclarativeBase):
     __abstract__ = True
     metadata = MetaData(
         naming_convention=settings.database.naming_convention,
@@ -42,7 +42,7 @@ class BaseModel(DeclarativeBase):
     )
 
 
-class User(BaseModel):
+class User(BaseDbModel):
     telegram_id: Mapped[int] = mapped_column(unique=True)
     chat_id: Mapped[int] = mapped_column(unique=True)
     name: Mapped[str] = mapped_column(String(32))
@@ -52,7 +52,7 @@ class User(BaseModel):
     assets: Mapped[list["Assets"]] = relationship(back_populates="user")
 
 
-class Expense(BaseModel):
+class Expense(BaseDbModel):
     amount: Mapped[float] = mapped_column(Numeric(10, 2))
     description: Mapped[str | None] = mapped_column(Text)
     user: Mapped["User"] = relationship(back_populates="expenses")
@@ -61,7 +61,7 @@ class Expense(BaseModel):
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"))
 
 
-class Category(BaseModel):
+class Category(BaseDbModel):
     codename: Mapped[str] = mapped_column(String(32), unique=True)
     name: Mapped[str] = mapped_column(String(32))
     aliases: Mapped[list[str]]
@@ -69,7 +69,7 @@ class Category(BaseModel):
     expenses: Mapped[list["Expense"]] = relationship(back_populates="category")
 
 
-class Assets(BaseModel):
+class Assets(BaseDbModel):
     codename: Mapped[str]
     amount: Mapped[int]
     name: Mapped[str] = mapped_column(String(32))
