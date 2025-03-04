@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class CategoryScheme(BaseModel):
@@ -8,15 +8,20 @@ class CategoryScheme(BaseModel):
     codename: str
     name: str
     is_base_expense: bool
-    expenses: list["ExpenseScheme"] = Field(default_factory=list)
+
+    class Config:
+        from_attributes = True
 
 
 class ExpenseScheme(BaseModel):
-    id: int
+    id: int | None
     amount: float
     category_name: str
     user_id: int
     category_id: int
+
+    class Config:
+        from_attributes = True
 
 
 class ExpenseCreateScheme(BaseModel):
@@ -39,8 +44,9 @@ class UserScheme(BaseModel):
     name: str
     lastname: str | None
     is_active: bool
-    expenses: list["ExpenseScheme"] = Field(default_factory=list)
-    assets: list["AssetsScheme"] = Field(default_factory=list)
+
+    class Config:
+        from_attributes = True
 
 
 class ExpenseTopScheme(BaseModel):

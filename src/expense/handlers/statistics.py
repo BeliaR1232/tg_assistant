@@ -32,7 +32,7 @@ async def get_month_stat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     user_telegram_id = update.effective_user.id
-    statistics = await get_statistics_by_months_count(session, user_telegram_id)
+    statistics = await get_statistics_by_months_count(user_telegram_id)
     answer = "Статистика по категориям\n\n"
     resume = 0
     for stat in statistics:
@@ -46,7 +46,7 @@ async def get_top_expense_stat(update: Update, context: ContextTypes.DEFAULT_TYP
     query = update.callback_query
     await query.answer()
     user_telegram_id = update.effective_user.id
-    statistics = await get_top_expense(session, user_telegram_id)
+    statistics = await get_top_expense(user_telegram_id)
     answer = "Последние 10 трат:\n\n"
     for stat in statistics:
         answer += expense_template.format(
@@ -59,11 +59,14 @@ async def get_top_expense_stat(update: Update, context: ContextTypes.DEFAULT_TYP
     await context.bot.send_message(chat_id=update.effective_chat.id, text=answer, reply_markup=main_keyboard)
 
 
-async def get_three_months_stat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def get_three_months_stat(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
     query = update.callback_query
     await query.answer()
     user_telegram_id = update.effective_user.id
-    statistics = await get_statistics_by_months_count(session, user_telegram_id, 3)
+    statistics = await get_statistics_by_months_count(user_telegram_id, 3)
     answer = "Статистика по категориям\n\n"
     resume = 0
     for stat in statistics:

@@ -1,8 +1,8 @@
 from src.database.db_helper import db_helper
-from src.database.models import Assets, BaseModel, Category, Expense, User
+from src.database.models import Assets, BaseDbModel, Category, Expense, User
 
 __all__ = [
-    "BaseModel",
+    "BaseDbModel",
     "User",
     "Expense",
     "Category",

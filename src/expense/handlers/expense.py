@@ -1,9 +1,8 @@
 import pytz
+from sqlalchemy.exc import SQLAlchemyError
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
-from src.database import db_helper
-from src.expense.exceptions import BadExpense
 from src.expense.handlers.statistics import expense_template
 from src.expense.schemes import ExpenseCreateScheme
 from src.expense.service import (
@@ -16,95 +15,107 @@ from src.handlers import main_keyboard
 
 AMOUNT, CATEGORY, DESCRIPTION, DELETE = range(4)
 
-session = db_helper.session_factory()
 
-
-async def delete_expense_start(update: Update, contex: ContextTypes.DEFAULT_TYPE):
+async def delete_expense_start(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """Начало процесса удаления расходов."""
     user_telegram_id = update.effective_user.id
-    expenses = await get_top_expense(session, user_telegram_id)
-    answer = "Последние 10 трат.:\n\n"
-    for expense in expenses:
-        answer += expense_template.format(
+    expenses = await get_top_expense(user_telegram_id)
+
+    if not expenses:
+        await update.message.reply_text("У вас пока нет расходов.")
+        return ConversationHandler.END
+
+    answer = "Последние 10 трат:\n\n" + "\n".join(
+        expense_template.format(
             expense_id=expense.id,
             expense_category=expense.category_name,
-            expense_desc=expense.description if expense.description else "",
+            expense_desc=expense.description or "",
             expense_amount=expense.amount,
             expense_dt=expense.created_at.astimezone(pytz.timezone("Europe/Moscow")).strftime("%Y-%m-%d %H:%M:%S"),
         )
+        for expense in expenses
+    )
+
     await update.message.reply_text(answer, reply_markup=ReplyKeyboardRemove())
-    await update.message.reply_text("Введите id траты, которую хотите удалить.")
+    await update.message.reply_text("Введите ID траты, которую хотите удалить.")
     return DELETE
 
 
 async def delete_expense_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обработчик удаления расхода."""
     expense_id = update.message.text
-    if not expense_id.isdigit():
-        await update.message.reply_text("Пожалуйста, введите корректный id траты.")
+    if not expense_id or not expense_id.isdigit():
+        await update.message.reply_text("Пожалуйста, введите корректный ID траты.")
         return DELETE
-    await delete_expense(session, expense_id)
-    await update.message.reply_text(f"Расход {expense_id} успешно удалён.", reply_markup=main_keyboard)
+
+    try:
+        await delete_expense(int(expense_id))
+        await update.message.reply_text(f"Расход {expense_id} успешно удалён.", reply_markup=main_keyboard)
+    except SQLAlchemyError:
+        await update.message.reply_text("Ошибка удаления расхода. Попробуйте снова.")
+        return DELETE
+
     return ConversationHandler.END
 
 
 async def add_expense_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Запрашивает сумму расхода."""
     await update.message.reply_text("Введите сумму расхода:", reply_markup=ReplyKeyboardRemove())
     return AMOUNT
 
 
 async def process_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обрабатывает введённую сумму расхода."""
     try:
-        amount = update.message.text.replace(",", ".")
-        amount = abs(float(amount))
+        amount = abs(float(update.message.text.replace(",", ".")))
         context.user_data["amount"] = amount
-        categories = await get_all_category(session)
 
-        category_keybord = [[category.name] for category in categories]
-        await update.message.reply_text(
-            "Введите категорию расхода:",
-            reply_markup=ReplyKeyboardMarkup(
-                category_keybord,
-                resize_keyboard=True,
-            ),
-        )
-        return CATEGORY
     except ValueError:
-        await update.message.reply_text("Пожалуйста, введите корректную сумму")
+        await update.message.reply_text("Пожалуйста, введите корректную сумму.")
         return AMOUNT
+
+    categories = await get_all_category()
+
+    category_keyboard = [[category.name] for category in categories]
+    await update.message.reply_text(
+        "Введите категорию расхода:",
+        reply_markup=ReplyKeyboardMarkup(category_keyboard, resize_keyboard=True),
+    )
+    return CATEGORY
 
 
 async def process_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    category = update.message.text
-    context.user_data["category"] = category
-    skip_mark = ReplyKeyboardMarkup(
-        [["Пропустить"]],
-        resize_keyboard=True,
-        input_field_placeholder="Начните вводить описание...",
+    """Обрабатывает введённую категорию."""
+    context.user_data["category"] = update.message.text
+    await update.message.reply_text(
+        "Введите описание (или пропустите):",
+        reply_markup=ReplyKeyboardMarkup([["Пропустить"]], resize_keyboard=True),
     )
-    await update.message.reply_text("Введите описание (или пропустите):", reply_markup=skip_mark)
     return DESCRIPTION
 
 
 async def process_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обрабатывает описание и сохраняет расход в базе данных."""
     description = update.message.text if update.message.text != "Пропустить" else None
     user_data = context.user_data
+
     expense = ExpenseCreateScheme(
         amount=user_data["amount"],
         category_name=user_data["category"],
         description=description,
     )
 
-    expense = await add_expense(session, expense, update)
-    answer = f"Добавленны траты 🛒:\nСумма: {expense.amount}\nКатегория: {expense.category_name}"
-    await update.message.reply_text(answer, reply_markup=main_keyboard)
-    return ConversationHandler.END
-
-
-async def add_expense_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    raw_expense = context.args
     try:
-        expense = await add_expense(session, raw_expense, update)
-    except BadExpense:
-        answer = "Неверный формат сообщения!\nПример правильного сообщения: '100 кафе' или 'кафе 100'."
-    else:
-        answer = f"Добавленны траты 🛒:\nСумма: {expense.amount}\nКатегория: {expense.category_name}"
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=answer)
+        expense = await add_expense(expense, update)
+        await update.message.reply_text(
+            f"Добавлены траты 🛒:\nСумма: {expense.amount}\nКатегория: {expense.category_name}",
+            reply_markup=main_keyboard,
+        )
+    except SQLAlchemyError:
+        await update.message.reply_text("Ошибка добавления расхода. Попробуйте снова.")
+        return AMOUNT
+
+    return ConversationHandler.END
