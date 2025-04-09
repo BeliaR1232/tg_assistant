@@ -42,7 +42,7 @@ async def check_events(context: ContextTypes.DEFAULT_TYPE):
             for event in events:
                 user = await uow.user.get_by_id(event.user_id)
                 for count in range(event.message_count):
-                    time_to_send = event.event_datetime + timedelta(minutes=count + 1)
+                    time_to_send = event.event_datetime + timedelta(hours=count + 1, minutes=30)
                     context.job_queue.run_once(
                         send_reminder,
                         time_to_send,
