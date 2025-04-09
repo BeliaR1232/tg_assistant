@@ -1,7 +1,16 @@
+from enum import Enum
+
 import pytz
 from sqlalchemy.exc import SQLAlchemyError
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    ContextTypes,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
 
 from src.expense.handlers.statistics import expense_template
 from src.expense.schemes import ExpenseCreateScheme
@@ -11,9 +20,14 @@ from src.expense.service import (
     get_all_category,
     get_top_expense,
 )
-from src.handlers import main_keyboard
+from src.handlers import cancel, main_keyboard
 
-AMOUNT, CATEGORY, DESCRIPTION, DELETE = range(4)
+
+class ExpenseState(Enum):
+    AMOUNT = "amount"
+    CATEGORY = "category"
+    DESCRIPTION = "description"
+    DELETE = "delete"
 
 
 async def delete_expense_start(
@@ -41,7 +55,7 @@ async def delete_expense_start(
 
     await update.message.reply_text(answer, reply_markup=ReplyKeyboardRemove())
     await update.message.reply_text("Введите ID траты, которую хотите удалить.")
-    return DELETE
+    return ExpenseState.DELETE
 
 
 async def delete_expense_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -49,14 +63,14 @@ async def delete_expense_handler(update: Update, context: ContextTypes.DEFAULT_T
     expense_id = update.message.text
     if not expense_id or not expense_id.isdigit():
         await update.message.reply_text("Пожалуйста, введите корректный ID траты.")
-        return DELETE
+        return ExpenseState.DELETE
 
     try:
         await delete_expense(int(expense_id))
         await update.message.reply_text(f"Расход {expense_id} успешно удалён.", reply_markup=main_keyboard)
     except SQLAlchemyError:
         await update.message.reply_text("Ошибка удаления расхода. Попробуйте снова.")
-        return DELETE
+        return ExpenseState.DELETE
 
     return ConversationHandler.END
 
@@ -64,7 +78,7 @@ async def delete_expense_handler(update: Update, context: ContextTypes.DEFAULT_T
 async def add_expense_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Запрашивает сумму расхода."""
     await update.message.reply_text("Введите сумму расхода:", reply_markup=ReplyKeyboardRemove())
-    return AMOUNT
+    return ExpenseState.AMOUNT
 
 
 async def process_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -75,7 +89,7 @@ async def process_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except ValueError:
         await update.message.reply_text("Пожалуйста, введите корректную сумму.")
-        return AMOUNT
+        return ExpenseState.AMOUNT
 
     categories = await get_all_category()
 
@@ -84,7 +98,7 @@ async def process_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Введите категорию расхода:",
         reply_markup=ReplyKeyboardMarkup(category_keyboard, resize_keyboard=True),
     )
-    return CATEGORY
+    return ExpenseState.CATEGORY
 
 
 async def process_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -94,7 +108,7 @@ async def process_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Введите описание (или пропустите):",
         reply_markup=ReplyKeyboardMarkup([["Пропустить"]], resize_keyboard=True),
     )
-    return DESCRIPTION
+    return ExpenseState.DESCRIPTION
 
 
 async def process_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -109,13 +123,53 @@ async def process_description(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
     try:
-        expense = await add_expense(expense, update)
+        expense = await add_expense(
+            expense,
+            update.effective_user.id,
+            update.effective_message.id,
+            update.effective_user.first_name,
+            update.effective_user.last_name,
+        )
         await update.message.reply_text(
             f"Добавлены траты 🛒:\nСумма: {expense.amount}\nКатегория: {expense.category_name}",
             reply_markup=main_keyboard,
         )
     except SQLAlchemyError:
         await update.message.reply_text("Ошибка добавления расхода. Попробуйте снова.")
-        return AMOUNT
+        return ExpenseState.AMOUNT
 
     return ConversationHandler.END
+
+
+async def get_finance_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Выводит кнопки с вариантами статистики."""
+    finance_keyboard = ReplyKeyboardMarkup(
+        [["Статистика"], ["Добавить расход"], ["Удалить расход"]],
+        resize_keyboard=True,
+        input_field_placeholder="Выбери действие:",
+    )
+    await update.message.reply_text("Выберите вид отчёта:", reply_markup=finance_keyboard)
+
+
+def register_expense_handler(application: Application):
+    finance_handler = MessageHandler(filters.Regex("^Финансы$"), get_finance_start)
+
+    add_expense_handler = ConversationHandler(
+        entry_points=[MessageHandler(filters.Regex("^Добавить расход$"), add_expense_start)],
+        states={
+            ExpenseState.AMOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_amount)],
+            ExpenseState.CATEGORY: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_category)],
+            ExpenseState.DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_description)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+    delete_expense_handler_main = ConversationHandler(
+        entry_points=[MessageHandler(filters.Regex("^Удалить расход$"), delete_expense_start)],
+        states={
+            ExpenseState.DELETE: [MessageHandler(filters.TEXT & ~filters.COMMAND, delete_expense_handler)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+    application.add_handler(finance_handler)
+    application.add_handler(add_expense_handler)
+    application.add_handler(delete_expense_handler_main)

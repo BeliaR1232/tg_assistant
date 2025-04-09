@@ -1,12 +1,12 @@
-from typing import Generic, Optional, Sequence, Type, TypeVar
+from typing import Any, Generic, Optional, Sequence, Type, TypeVar
 
-from sqlalchemy import delete
+from sqlalchemy import delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from src.database.models import BaseDbModel
 
-T = TypeVar("T", bound=BaseDbModel)  # Обобщённый тип модели (например, Expense, User)
+T = TypeVar("T", bound=BaseDbModel)
 
 
 class BaseRepository(Generic[T]):
@@ -31,10 +31,14 @@ class BaseRepository(Generic[T]):
     async def add(self, obj: T) -> T:
         """Добавляет новый объект."""
         self.session.add(obj)
-        await self.session.flush()
         return obj
 
     async def delete(self, obj_id: int):
         """Удаляет объект по ID."""
         stmt = delete(self.model).where(self.model.id == obj_id)
         await self.session.execute(stmt)
+
+    async def update(self, obj_id: int, update_fields: dict[str, Any]):
+        stmt = update(self.model).where(self.model.id == obj_id).values(**update_fields).returning(self.model)
+        result = await self.session.execute(stmt)
+        return result.scalar_one()

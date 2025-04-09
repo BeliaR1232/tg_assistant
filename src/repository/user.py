@@ -12,7 +12,7 @@ class UserRepository(BaseRepository[User]):
     def __init__(self, session):
         super().__init__(session, User)
 
-    async def get_user_by_tg_id(self, telegram_id) -> Optional[User]:
+    async def get_user_by_tg_id(self, telegram_id: int) -> Optional[User]:
         stmt = select(self.model).where(self.model.telegram_id == telegram_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
