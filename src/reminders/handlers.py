@@ -278,7 +278,7 @@ async def start_reminders_handler(update: Update, context: ContextTypes.DEFAULT_
         resize_keyboard=True,
         input_field_placeholder="Выбери действие:",
     )
-    await update.message.reply_text("", reply_markup=finance_keyboard)
+    await update.message.reply_text("Выбери действие:", reply_markup=finance_keyboard)
 
 
 def register_reminder_handler(application: Application):
