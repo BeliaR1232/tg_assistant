@@ -13,6 +13,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.sql import func
 
 from src.configs import settings
+from src.reminders.schemes import EventRepeatInterval
 from src.utils import camel_case_to_snake_case, datetime_utc_now
 
 
@@ -50,15 +51,16 @@ class User(BaseDbModel):
     is_active: Mapped[bool] = mapped_column(default=True)
     expenses: Mapped[list["Expense"]] = relationship(back_populates="user")
     assets: Mapped[list["Assets"]] = relationship(back_populates="user")
+    events: Mapped[list["Event"]] = relationship(back_populates="user")
 
 
 class Expense(BaseDbModel):
     amount: Mapped[float] = mapped_column(Numeric(10, 2))
     description: Mapped[str | None] = mapped_column(Text)
-    user: Mapped["User"] = relationship(back_populates="expenses")
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    category: Mapped["Category"] = relationship(back_populates="expenses")
+    user: Mapped["User"] = relationship(back_populates="expenses")
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"))
+    category: Mapped["Category"] = relationship(back_populates="expenses")
 
 
 class Category(BaseDbModel):
@@ -73,5 +75,19 @@ class Assets(BaseDbModel):
     codename: Mapped[str]
     amount: Mapped[int]
     name: Mapped[str] = mapped_column(String(32))
-    user: Mapped["User"] = relationship(back_populates="assets")
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user: Mapped["User"] = relationship(back_populates="assets")
+
+
+class Event(BaseDbModel):
+    event_datetime: Mapped[datetime]
+    description: Mapped[str] = mapped_column(Text)
+    repeat_interval: Mapped[EventRepeatInterval | None] = mapped_column(
+        postgresql.ENUM(
+            EventRepeatInterval,
+            name="event_repeat_intervals",
+        )
+    )
+    message_count: Mapped[int] = mapped_column(default=3)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user: Mapped["User"] = relationship(back_populates="events")

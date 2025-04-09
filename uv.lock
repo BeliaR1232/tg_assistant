@@ -40,16 +40,28 @@ wheels = [
 
 [[package]]
 name = "anyio"
-version = "4.8.0"
+version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "idna" },
     { name = "sniffio" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/73/199a98fc2dae33535d6b8e8e6ec01f8c1d76c9adb096c6b7d64823038cde/anyio-4.8.0.tar.gz", hash = "sha256:1d9fe889df5212298c0c0723fa20479d1b94883a2df44bd3897aa91083316f7a", size = 181126 }
+sdist = { url = "https://files.pythonhosted.org/packages/95/7d/4c1bd541d4dffa1b52bd83fb8527089e097a106fc90b467a7313b105f840/anyio-4.9.0.tar.gz", hash = "sha256:673c0c244e15788651a4ff38710fea9675823028a6f08a5eda409e0c9840a028", size = 190949 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/46/eb/e7f063ad1fec6b3178a3cd82d1a3c4de82cccf283fc42746168188e1cdd5/anyio-4.8.0-py3-none-any.whl", hash = "sha256:b5011f270ab5eb0abf13385f851315585cc37ef330dd88e27ec3d34d651fd47a", size = 96041 },
+    { url = "https://files.pythonhosted.org/packages/a1/ee/48ca1a7c89ffec8b6a0c5d02b89c305671d5ffd8d3c94acf8b8c408575bb/anyio-4.9.0-py3-none-any.whl", hash = "sha256:9f76d541cad6e36af7beb62e978876f3b41e3e04f2c1fbf0884604c0a9c4d93c", size = 100916 },
+]
+
+[[package]]
+name = "apscheduler"
+version = "3.11.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tzlocal" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4e/00/6d6814ddc19be2df62c8c898c4df6b5b1914f3bd024b780028caa392d186/apscheduler-3.11.0.tar.gz", hash = "sha256:4c622d250b0955a65d5d0eb91c33e6d43fd879834bf541e0a18661ae60460133", size = 107347 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d0/ae/9a053dd9229c0fde6b1f1f33f609ccff1ee79ddda364c756a924c6d8563b/APScheduler-3.11.0-py3-none-any.whl", hash = "sha256:fc134ca32e50f5eadcc4938e3a4545ab19131435e851abb40b34d63d5141c6da", size = 64004 },
 ]
 
 [[package]]
@@ -78,11 +90,11 @@ wheels = [
 
 [[package]]
 name = "certifi"
-version = "2024.12.14"
+version = "2025.1.31"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/0f/bd/1d41ee578ce09523c81a15426705dd20969f5abf006d1afe8aeff0dd776a/certifi-2024.12.14.tar.gz", hash = "sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db", size = 166010 }
+sdist = { url = "https://files.pythonhosted.org/packages/1c/ab/c9f1e32b7b1bf505bf26f0ef697775960db7932abeb7b516de930ba2705f/certifi-2025.1.31.tar.gz", hash = "sha256:3d5da6925056f6f18f119200434a4780a94263f10d1c21d032a6f6b2baa20651", size = 167577 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a5/32/8f6669fc4798494966bf446c8c4a162e0b5d893dff088afddf76414f70e1/certifi-2024.12.14-py3-none-any.whl", hash = "sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56", size = 164927 },
+    { url = "https://files.pythonhosted.org/packages/38/fc/bce832fd4fd99766c04d1ee0eead6b0ec6486fb100ae5e74c1d91292b982/certifi-2025.1.31-py3-none-any.whl", hash = "sha256:ca78db4565a652026a4db2bcdf68f2fb589ea80d0be70e03929ed730746b84fe", size = 166393 },
 ]
 
 [[package]]
@@ -337,14 +349,19 @@ wheels = [
 
 [[package]]
 name = "python-telegram-bot"
-version = "21.10"
+version = "22.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4b/bc/3a00800cc495e3b4c031c5402faa2fc36b6411438d0fd91175f0c8f59471/python_telegram_bot-21.10.tar.gz", hash = "sha256:40481a8c4814ce2e530a21ce45d389695b0b210c5fb9dc75b8529aba8c9e76f8", size = 438289 }
+sdist = { url = "https://files.pythonhosted.org/packages/61/8c/0bd0d5c6de549ee0ebc2ddf4d49618eec1ece6d25084f3b4ef72bba6590c/python_telegram_bot-22.0.tar.gz", hash = "sha256:acf86f28d86d81cab736177d2988e5bcb27f2248137efd62e02c46e9ba1fe44c", size = 440017 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f3/2f/b0823ff9ff7bca716ff05b8bfb3e1f058e0dd1f89fc8ec838e5467c1ffdd/python_telegram_bot-21.10-py3-none-any.whl", hash = "sha256:c874d2461d6bfa4b05c314cf6116cf1dafe537689aa8249924dd988603b6ba21", size = 669463 },
+    { url = "https://files.pythonhosted.org/packages/15/9f/b8c116f606074c19ec2600a7edc222f158c307ca949de568d67fe2b9d364/python_telegram_bot-22.0-py3-none-any.whl", hash = "sha256:23237f778655e634f08cfebbada96ed3692c2bdd3c20c122e90a6d606d6a4516", size = 673473 },
+]
+
+[package.optional-dependencies]
+job-queue = [
+    { name = "apscheduler" },
 ]
 
 [[package]]
@@ -354,6 +371,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/5f/57/df1c9157c8d5a05117e455d66fd7cf6dbc46974f832b1058ed4856785d8a/pytz-2025.1.tar.gz", hash = "sha256:c2db42be2a2518b28e65f9207c4d05e6ff547d1efa4086469ef855e4ab70178e", size = 319617 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/eb/38/ac33370d784287baa1c3d538978b5e2ea064d4c1b93ffbd12826c190dd10/pytz-2025.1-py2.py3-none-any.whl", hash = "sha256:89dd22dca55b46eac6eda23b2d72721bf1bdfef212645d81513ef5d03038de57", size = 507930 },
+]
+
+[[package]]
+name = "redis"
+version = "5.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/47/da/d283a37303a995cd36f8b92db85135153dc4f7a8e4441aa827721b442cfb/redis-5.2.1.tar.gz", hash = "sha256:16f2e22dff21d5125e8481515e386711a34cbec50f0e44413dd7d9c060a54e0f", size = 4608355 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3c/5f/fa26b9b2672cbe30e07d9a5bdf39cf16e3b80b42916757c5f92bca88e4ba/redis-5.2.1-py3-none-any.whl", hash = "sha256:ee7e1056b9aea0f04c6c2ed59452947f34c4940ee025f5dd83e6a6418b6989e4", size = 261502 },
 ]
 
 [[package]]
@@ -420,8 +446,9 @@ dependencies = [
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "python-dateutil" },
-    { name = "python-telegram-bot" },
+    { name = "python-telegram-bot", extra = ["job-queue"] },
     { name = "pytz" },
+    { name = "redis" },
     { name = "sqlalchemy", extra = ["asyncio"] },
 ]
 
@@ -434,8 +461,9 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.10.6,<3" },
     { name = "pydantic-settings", specifier = ">=2.7.1,<3" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0,<3" },
-    { name = "python-telegram-bot", specifier = "~=21.10" },
+    { name = "python-telegram-bot", extras = ["job-queue"], specifier = ">=22.0" },
     { name = "pytz", specifier = ">=2025.1" },
+    { name = "redis", specifier = ">=5.2.1" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.37,<3" },
 ]
 
@@ -446,4 +474,25 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/df/db/f35a00659bc03fec321ba8bce9420de607a1d37f8342eee1863174c69557/typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8", size = 85321 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/26/9f/ad63fc0248c5379346306f8668cda6e2e2e9c95e01216d2b8ffd9ff037d0/typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d", size = 37438 },
+]
+
+[[package]]
+name = "tzdata"
+version = "2025.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/95/32/1a225d6164441be760d75c2c42e2780dc0873fe382da3e98a2e1e48361e5/tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9", size = 196380 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/23/c7abc0ca0a1526a0774eca151daeb8de62ec457e77262b66b359c3c7679e/tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8", size = 347839 },
+]
+
+[[package]]
+name = "tzlocal"
+version = "5.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tzdata", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8b/2e/c14812d3d4d9cd1773c6be938f89e5735a1f11a9f184ac3639b93cef35d5/tzlocal-5.3.1.tar.gz", hash = "sha256:cceffc7edecefea1f595541dbd6e990cb1ea3d19bf01b2809f362a03dd7921fd", size = 30761 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c2/14/e2a54fabd4f08cd7af1c07030603c3356b74da07f7cc056e600436edfa17/tzlocal-5.3.1-py3-none-any.whl", hash = "sha256:eb1a66c3ef5847adf7a834f1be0800581b683b5608e74f86ecbcef8ab91bb85d", size = 18026 },
 ]

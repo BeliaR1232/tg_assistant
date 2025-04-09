@@ -1,15 +1,11 @@
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
-from src.database import db_helper
-
 main_keyboard = ReplyKeyboardMarkup(
-    [["Добавить расход"], ["Удалить расход"], ["Статистика"]],
+    [["Финансы"], ["Напоминания"]],
     resize_keyboard=True,
-    input_field_placeholder="Выбери действие:",
+    input_field_placeholder="Выбери категорию:",
 )
-
-session = db_helper.session_factory()
 
 
 async def start(update: Update, contex: ContextTypes.DEFAULT_TYPE):

@@ -1,3 +1,11 @@
+from datetime import datetime, timezone
+
+
+def datetime_utc_now() -> datetime:
+    """Текущее время в UTC."""
+    return datetime.now(timezone.utc)
+
+
 def camel_case_to_snake_case(input_str: str) -> str:
     """
     >>> camel_case_to_snake_case("SomeSDK")
