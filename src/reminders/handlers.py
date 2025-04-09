@@ -2,7 +2,6 @@ import logging
 from enum import Enum
 
 from telegram import (
-    Bot,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
     Update,
@@ -16,7 +15,6 @@ from telegram.ext import (
     filters,
 )
 
-from src.configs import settings
 from src.handlers import cancel
 from src.reminders import services as event_service
 from src.reminders.schemes import EventCreateScheme, EventRepeatInterval
@@ -280,8 +278,7 @@ async def start_reminders_handler(update: Update, context: ContextTypes.DEFAULT_
         resize_keyboard=True,
         input_field_placeholder="Выбери действие:",
     )
-    await Bot(settings.bot.token).send_message(update.effective_user.id, "Привет чёрт!")
-    await update.message.reply_text("Выберите вид отчёта:", reply_markup=finance_keyboard)
+    await update.message.reply_text("", reply_markup=finance_keyboard)
 
 
 def register_reminder_handler(application: Application):
