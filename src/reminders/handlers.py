@@ -28,6 +28,7 @@ class EventDialogStates(Enum):
     ADD_DESCRIPTION = "add_description"
     ADD_EVENT_DATETIME = "add_event_datetime"
     ADD_REPEAT_INTERVAL = "add_repeat_interval"
+    ADD_MESSAGE_COUNT = "add_message_count"
     CONFIRM_EVENT = "confirm_event"
     EDIT_EVENT = "edit_event"
     DELETE_EVENT = "delete_event"
@@ -70,6 +71,19 @@ async def add_event_datetime(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def add_event_repeat_interval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     repeat_interval = update.message.text.lower() if update.message.text != "Пропустить" else None
     context.user_data["repeat_interval"] = repeat_interval
+    await update.message.reply_text(
+        "Введите количество сообщений(число больше 0) для напоминания(по умолчанию будет 3 напоминания.):",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+    return EventDialogStates.ADD_MESSAGE_COUNT
+
+
+async def add_event_message_count(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message_count: str = update.message.text or "3"
+    if not message_count.isdigit():
+        await update.message.reply_text("Некорректное количество напоминаний, введите число больше 0:")
+        return EventDialogStates.ADD_MESSAGE_COUNT
+    context.user_data["message_count"] = int(message_count)
     await confirm_event(update, context)
     return EventDialogStates.CONFIRM_EVENT
 
@@ -79,8 +93,9 @@ async def confirm_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
         description = context.user_data.get("description")
         date_time = context.user_data.get("event_datetime")
         repeat_interval = context.user_data.get("repeat_interval")
+        message_count = context.user_data.get("message_count")
 
-        message = f"Событие:\n📅 Описание: {description}\n⏰ Дата/время: {date_time}\n🔄 Интервал: {repeat_interval or 'Однократное'}"
+        message = f"Событие:\n📅 Описание: {description}\n⏰ Дата/время: {date_time}\n🔄 Интервал: {repeat_interval or 'Однократное'}\nКоличество сообщений: {message_count}"
         await update.message.reply_text(
             f"{message}\nПодтвердите добавление события (да/нет):", reply_markup=ReplyKeyboardRemove()
         )
@@ -100,6 +115,7 @@ async def confirm_event_submission(update: Update, context: ContextTypes.DEFAULT
             description=context.user_data.get("description"),
             event_datetime=context.user_data.get("event_datetime"),
             repeat_interval=context.user_data.get("repeat_interval"),
+            message_count=context.user_data.get("message_count"),
         )
 
         result_event = await event_service.add_event_by_tg(
@@ -288,6 +304,9 @@ def register_reminder_handler(application: Application):
         entry_points=[MessageHandler(filters.Regex("^Добавить напоминание$"), add_event_start)],
         states={
             EventDialogStates.ADD_DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_event_description)],
+            EventDialogStates.ADD_MESSAGE_COUNT: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, add_event_message_count)
+            ],
             EventDialogStates.ADD_EVENT_DATETIME: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_event_datetime)],
             EventDialogStates.ADD_REPEAT_INTERVAL: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, add_event_repeat_interval)

@@ -29,6 +29,7 @@ async def add_event_by_tg(
             description=event.description,
             event_datetime=event.event_datetime,
             repeat_interval=event.repeat_interval,
+            message_count=event.message_count,
         )
         new_event = await uow.event.add(new_event)
         await uow.commit()
