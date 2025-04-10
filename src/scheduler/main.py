@@ -23,11 +23,6 @@ async def shutdown(ctx):
     await ctx["redis"].aclose()
 
 
-async def main():
-    redis = await create_pool(RedisSettings())
-    await redis.enqueue_job("download_content", "https://httpbin.org/status/503")
-
-
 class WorkerSettings:
     functions = [send_reminder]
     on_startup = startup
