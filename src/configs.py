@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class BotSettings(BaseModel):
     token: str
+    reminder_token: str
 
 
 class DatabaseSettings(BaseModel):

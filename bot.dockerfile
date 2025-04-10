@@ -11,22 +11,15 @@ ENV UID=1001 \
     DOCKERIZE_VERSION=v0.9.2 \
     PATH="$PATH:/root/.local/bin"
 
-RUN apt-get update \
-  && apt-get install --no-install-recommends -y \
-    bash \
-    build-essential \
-    curl \
-    gettext \
-    git \
-    libpq-dev \
+RUN apt update \
+  && apt install --no-install-recommends -y \
     wget \
-    libffi-dev \
-  && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* \
+  && apt autoremove -y && apt clean -y && rm -rf /var/lib/apt/lists/* \
   && wget "https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz" \
   && tar -C /usr/local/bin -xzvf "dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz" \
   && rm "dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz" && dockerize --version \
   && pip install -U pip \
-  && curl -LsSf https://astral.sh/uv/install.sh | sh \
+  && wget -qO- https://astral.sh/uv/install.sh | sh \
   && uv --version
 
 WORKDIR /code
