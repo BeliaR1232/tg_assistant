@@ -16,7 +16,7 @@ class EventCreateScheme(BaseModel):
     description: str
     event_datetime: datetime
     repeat_interval: EventRepeatInterval | None
-    message_count: int
+    message_count: int | None
 
 
 class EventScheme(BaseModel):

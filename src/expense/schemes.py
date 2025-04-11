@@ -60,3 +60,4 @@ class ExpenseTopScheme(BaseModel):
 class ExpenseStatisticScheme(BaseModel):
     amount: float
     category_name: str
+    created_at: datetime

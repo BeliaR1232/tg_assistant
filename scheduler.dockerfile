@@ -9,7 +9,8 @@ ENV UID=1001 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
     DOCKERIZE_VERSION=v0.9.2 \
-    PATH="$PATH:/root/.local/bin"
+    PATH="$PATH:/root/.local/bin" \
+    TZ="Europe/Moscow"
 
 RUN apt update \
   && apt install --no-install-recommends -y \
