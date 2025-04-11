@@ -130,7 +130,7 @@ async def confirm_event_submission(update: Update, context: ContextTypes.DEFAULT
         )
         if result_event:
             await update.message.reply_text(
-                f"Событие успешно добавлено! ✅\n📅 {result_event.description}\n⏰ {result_event.event_datetime}"
+                f"Событие успешно добавлено! ✅\n📅 {result_event.description}\n⏰ {result_event.event_datetime}",
                 reply_markup=main_keyboard,
             )
         else:
@@ -291,7 +291,9 @@ async def confirm_edit_submission(update: Update, context: ContextTypes.DEFAULT_
 
         result = await event_service.update_event(event_id, description, event_datetime, repeat_interval)
         if result:
-            await update.message.reply_text(f"Событие с ID={event_id} успешно обновлено! ✅", reply_markup=main_keyboard)
+            await update.message.reply_text(
+                f"Событие с ID={event_id} успешно обновлено! ✅", reply_markup=main_keyboard
+            )
         else:
             await update.message.reply_text(f"Событие с ID={event_id} не обновлено. ❌", reply_markup=main_keyboard)
         return ConversationHandler.END
