@@ -15,7 +15,7 @@ from telegram.ext import (
     filters,
 )
 
-from src.handlers import cancel
+from src.handlers import cancel, main_keyboard
 from src.reminders import services as event_service
 from src.reminders.schemes import EventCreateScheme, EventRepeatInterval
 from src.reminders.utils import format_event_list
@@ -95,13 +95,16 @@ async def confirm_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
         repeat_interval = context.user_data.get("repeat_interval")
         message_count = context.user_data.get("message_count")
 
-        message = f"Событие:\n📅 Описание: {description}\n⏰ Дата/время: {date_time}\n🔄 Интервал: {repeat_interval or 'Однократное'}\nКоличество сообщений: {message_count}"
+        message = f"Событие:\n🗓️ Описание: {description}\n⏰ Дата/время: {date_time}\n🔄 Интервал: {repeat_interval or 'Однократное'}\n🔢 Количество сообщений: {message_count}"
         await update.message.reply_text(
             f"{message}\nПодтвердите добавление события (да/нет):", reply_markup=ReplyKeyboardRemove()
         )
     except Exception as e:
         logger.error(f"Ошибка при подтверждении события: {e}")
-        await update.message.reply_text("Произошла ошибка при подтверждении события. Попробуйте снова. ❌")
+        await update.message.reply_text(
+            "Произошла ошибка при подтверждении события. Попробуйте снова. ❌",
+            reply_markup=main_keyboard,
+        )
         return ConversationHandler.END
 
 
@@ -128,13 +131,17 @@ async def confirm_event_submission(update: Update, context: ContextTypes.DEFAULT
         if result_event:
             await update.message.reply_text(
                 f"Событие успешно добавлено! ✅\n📅 {result_event.description}\n⏰ {result_event.event_datetime}"
+                reply_markup=main_keyboard,
             )
         else:
             await update.message.reply_text("Произошла ошибка при добавлении события. Попробуйте снова. ❌")
         return ConversationHandler.END
     except Exception as e:
         logger.error(f"Ошибка при добавлении события: {e}")
-        await update.message.reply_text("Произошла ошибка при добавлении события. Попробуйте снова. ❌")
+        await update.message.reply_text(
+            "Произошла ошибка при добавлении события. Попробуйте снова. ❌",
+            reply_markup=main_keyboard,
+        )
         return ConversationHandler.END
 
 
@@ -145,7 +152,10 @@ async def get_list_events(update: Update, context: ContextTypes.DEFAULT_TYPE):
             message = format_event_list(events)
         else:
             message = "У вас нет запланированных событий. 📋"
-        await update.message.reply_text(text=message)
+        await update.message.reply_text(
+            text=message,
+            reply_markup=main_keyboard,
+        )
         return ConversationHandler.END
     except Exception as e:
         logger.error(f"Ошибка при получении списка событий: {e}")
@@ -160,6 +170,7 @@ async def delete_event_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
             message = format_event_list(events)
         else:
             message = "У вас нет запланированных событий. 📋"
+            await update.message.reply_text(message, reply_markup=main_keyboard)
             return ConversationHandler.END
         await update.message.reply_text(message, reply_markup=ReplyKeyboardRemove())
         await update.message.reply_text("Введите id событие для удаления:")
@@ -172,7 +183,7 @@ async def delete_event_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def delete_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        event_id = update.message.text
+        event_id = int(update.message.text)
         if not event_id or not event_id.isdigit():
             await update.message.reply_text("Пожалуйста, введите корректный ID напоминания.")
             return EventDialogStates.DELETE_EVENT
@@ -191,7 +202,8 @@ async def edit_event_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             message = format_event_list(events)
         else:
             message = "У вас нет запланированных событий. 📋"
-
+            await update.message.reply_text(message, reply_markup=main_keyboard)
+            return ConversationHandler.END
         await update.message.reply_text(message, reply_markup=ReplyKeyboardRemove())
         await update.message.reply_text("Введите id события для редактирования:")
         return EventDialogStates.EDIT_EVENT
@@ -259,7 +271,8 @@ async def confirm_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Ошибка при подтверждении редактирования события: {e}")
         await update.message.reply_text(
-            "Произошла ошибка при подтверждении редактирования события. Попробуйте снова. ❌"
+            "Произошла ошибка при подтверждении редактирования события. Попробуйте снова. ❌",
+            reply_markup=main_keyboard,
         )
         return ConversationHandler.END
 
@@ -268,19 +281,19 @@ async def confirm_edit_submission(update: Update, context: ContextTypes.DEFAULT_
     try:
         confirmation = update.message.text.lower()
         if confirmation != "да":
-            await update.message.reply_text("Редактирование события отменено. ❌")
+            await update.message.reply_text("Редактирование события отменено. ❌", reply_markup=main_keyboard)
             return ConversationHandler.END
 
         description = context.user_data.get("edit_description")
         event_datetime = context.user_data.get("edit_datetime")
         repeat_interval = context.user_data.get("edit_repeat_interval")
-        event_id = context.user_data.get("event_id")
+        event_id = int(context.user_data.get("event_id"))
 
         result = await event_service.update_event(event_id, description, event_datetime, repeat_interval)
         if result:
-            await update.message.reply_text(f"Событие с ID={event_id} успешно обновлено! ✅")
+            await update.message.reply_text(f"Событие с ID={event_id} успешно обновлено! ✅", reply_markup=main_keyboard)
         else:
-            await update.message.reply_text(f"Событие с ID={event_id} не обновлено. ❌")
+            await update.message.reply_text(f"Событие с ID={event_id} не обновлено. ❌", reply_markup=main_keyboard)
         return ConversationHandler.END
     except Exception as e:
         logger.error(f"Ошибка при обновлении события: {e}")
