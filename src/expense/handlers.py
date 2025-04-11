@@ -12,7 +12,6 @@ from telegram.ext import (
     filters,
 )
 
-from src.expense.handlers.statistics import expense_template
 from src.expense.schemes import ExpenseCreateScheme
 from src.expense.service import (
     add_expense,
@@ -20,6 +19,7 @@ from src.expense.service import (
     get_all_category,
     get_top_expense,
 )
+from src.expense_statistics.handlers import expense_template
 from src.handlers import cancel, main_keyboard
 
 

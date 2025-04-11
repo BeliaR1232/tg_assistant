@@ -6,12 +6,8 @@ from telegram.ext import (
 )
 
 from src.configs import settings
-from src.expense.handlers.expense import (
-    register_expense_handler,
-)
-from src.expense.handlers.statistics import (
-    register_statistic_handler,
-)
+from src.expense.handlers import register_expense_handler
+from src.expense_statistics.handlers import register_statistic_handler
 from src.handlers import start
 from src.reminders.handlers import register_reminder_handler
 

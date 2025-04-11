@@ -97,7 +97,11 @@ async def confirm_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         message = f"Событие:\n🗓️ Описание: {description}\n⏰ Дата/время: {date_time}\n🔄 Интервал: {repeat_interval or 'Однократное'}\n🔢 Количество сообщений: {message_count}"
         await update.message.reply_text(
-            f"{message}\nПодтвердите добавление события (да/нет):", reply_markup=ReplyKeyboardRemove()
+            f"{message}\nПодтвердите добавление события (да/нет):",
+            reply_markup=ReplyKeyboardMarkup(
+                [["Да"], ["Нет"]],
+                resize_keyboard=True,
+            ),
         )
     except Exception as e:
         logger.error(f"Ошибка при подтверждении события: {e}")
@@ -267,7 +271,13 @@ async def confirm_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
         repeat_interval = context.user_data.get("edit_repeat_interval")
 
         message = f"Событие:\n📅 Название: {description}\n⏰ Дата/время: {event_datetime}\n🔄 Интервал: {repeat_interval or 'Однократное'}"
-        await update.message.reply_text(f"{message}\nПодтвердите изменение события (да/нет):")
+        await update.message.reply_text(
+            f"{message}\nПодтвердите изменение события (да/нет):",
+            reply_markup=ReplyKeyboardMarkup(
+                [["Да"], ["Нет"]],
+                resize_keyboard=True,
+            ),
+        )
     except Exception as e:
         logger.error(f"Ошибка при подтверждении редактирования события: {e}")
         await update.message.reply_text(
