@@ -3,27 +3,12 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from arq.connections import ArqRedis
-from dateutil.relativedelta import relativedelta
 from telegram import Bot
 
 from src.core.unitofwork import get_uow
-from src.reminders.schemes import EventRepeatInterval
+from src.scheduler.utils import calculate_next_occurrence
 
 logger = logging.getLogger(__name__)
-
-
-def calculate_next_occurrence(current_date_time: datetime, repeat_interval: EventRepeatInterval):
-    match repeat_interval:
-        case EventRepeatInterval.DAILY:
-            return current_date_time + relativedelta(days=1)
-        case EventRepeatInterval.WEEKLY:
-            return current_date_time + relativedelta(weeks=1)
-        case EventRepeatInterval.MONTHLY:
-            return current_date_time + relativedelta(months=1)
-        case EventRepeatInterval.SIXMONTH:
-            return current_date_time + relativedelta(months=6)
-        case EventRepeatInterval.YEARLY:
-            return current_date_time + relativedelta(years=1)
 
 
 async def send_reminder(context: dict[str, Any], user_tg_id: int, event_id: int, message: str):
