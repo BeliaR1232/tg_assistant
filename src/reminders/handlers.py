@@ -46,7 +46,7 @@ async def add_event_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def add_event_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["description"] = update.message.text
-    await update.message.reply_text("Введите дату и время события (формат YYYY-MM-DD HH:MM):")
+    await update.message.reply_text("Введите дату и время напоминания (формат YYYY-MM-DD HH:MM):")
     return EventDialogStates.ADD_EVENT_DATETIME
 
 
@@ -183,11 +183,11 @@ async def delete_event_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def delete_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        event_id = int(update.message.text)
+        event_id = update.message.text
         if not event_id or not event_id.isdigit():
             await update.message.reply_text("Пожалуйста, введите корректный ID напоминания.")
             return EventDialogStates.DELETE_EVENT
-        await event_service.delete_event(event_id, update.effective_user.id)
+        await event_service.delete_event(int(event_id), update.effective_user.id)
         await update.message.reply_text(f"Событие с ID={event_id} успешно удалено. ✅")
     except Exception as e:
         logger.error(f"Ошибка при удалении события: {e}")
