@@ -36,7 +36,7 @@ class EventDialogStates(Enum):
     EDIT_NAME = "edit_name"
     EDIT_EVENT_DATETIME = "edit_event_datetime"
     EDIT_REPEAT_INTERVAL = "edit_repeat_interval"
-    CONFIRM_EDIT = " confirm_edit"
+    CONFIRM_EDIT = "confirm_edit"
 
 
 async def add_event_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
